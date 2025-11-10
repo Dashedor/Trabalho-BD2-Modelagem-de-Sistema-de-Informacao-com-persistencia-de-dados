@@ -21,4 +21,4 @@
     docker ps
 -Para executar a aplicacão digite no terminal:
 
-    python main.py
+    python menu.py
