@@ -42,13 +42,13 @@ class Menu:
             
             atendente = criar_atendente(
                 self.db, "Maria Santos", "maria@email.com", 
-                "98988887777", "ATD001", datetime.utcnow(),  
+                "98988887777", "ATD001",  
                 2500.00, endereco.idEndereco
             )
             
             tecnico = criar_tecnico(
                 self.db, "Carlos Oliveira", "carlos@email.com", 
-                "98977776666", "TEC001", datetime.utcnow(),
+                "98977776666", "TEC001", 
                 3500.00, "Hardware", endereco.idEndereco
             )
             

@@ -35,7 +35,6 @@ class Endereco(Base):
     bairro = Column(String(50), nullable=False)
     cidade = Column(String(50), nullable=False)
     estado = Column(String(50), nullable=False)
-    logradouro = Column(String(100), nullable=True)
 
 class Pessoa(Base):
     __tablename__ = "pessoa"
@@ -54,7 +53,6 @@ class Cliente(Base):
     
     id = Column(Integer, ForeignKey("pessoa.id"), primary_key=True)
     cpf = Column(String(11), unique=True, nullable=False)
-    dataCadastro = Column(DateTime, default=datetime.utcnow)
     
     pessoa = relationship("Pessoa")
 
@@ -63,7 +61,6 @@ class Funcionario(Base):
     
     id = Column(Integer, ForeignKey("pessoa.id"), primary_key=True)
     matricula = Column(String(20), unique=True, nullable=False)
-    dataAdmissao = Column(DateTime, nullable=False)
     
     pessoa = relationship("Pessoa")
 
