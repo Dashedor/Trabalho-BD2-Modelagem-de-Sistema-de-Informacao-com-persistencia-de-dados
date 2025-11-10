@@ -22,7 +22,6 @@ def criar_endereco(db: Session, cep: str, rua: str, bairro: str, cidade: str, es
         bairro=bairro,
         cidade=cidade,
         estado=estado,
-        logradouro=logradouro
     )
     db.add(endereco)
     db.commit()
@@ -168,3 +167,44 @@ def atualizar_estoque(db: Session, item_id: int, nova_quantidade: int):
         db.commit()
         db.refresh(item)
     return item
+
+def deletar_cliente(db: Session, cliente_id: int):
+    try:
+        cliente = db.query(Cliente).filter(Cliente.id == cliente_id).first()
+        if cliente:
+            dispositivos = db.query(Dispositivo).filter(Dispositivo.cliente_id == cliente_id).all()
+            if dispositivos:
+                print("Não é possível deletar cliente com dispositivos associados.")
+                return False
+            
+            db.delete(cliente)
+            
+            pessoa = db.query(Pessoa).filter(Pessoa.id == cliente_id).first()
+            if pessoa:
+                db.delete(pessoa)
+            
+            db.commit()
+            return True
+        return False
+    except Exception as e:
+        db.rollback()
+        print(f"Erro ao deletar cliente: {e}")
+        return False
+
+def deletar_dispositivo(db: Session, dispositivo_id: int):
+    try:
+        dispositivo = db.query(Dispositivo).filter(Dispositivo.id == dispositivo_id).first()
+        if dispositivo:
+            ordens = db.query(OrdemServico).filter(OrdemServico.dispositivo_id == dispositivo_id).all()
+            if ordens:
+                print("Não é possível deletar dispositivo com ordens de serviço associadas.")
+                return False
+            
+            db.delete(dispositivo)
+            db.commit()
+            return True
+        return False
+    except Exception as e:
+        db.rollback()
+        print(f"Erro ao deletar dispositivo: {e}")
+        return False
