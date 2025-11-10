@@ -34,30 +34,26 @@ def criar_cliente(db: Session, nome: str, email: str, telefone: str, cpf: str, e
     cliente = Cliente(
         id=pessoa.id,
         cpf=cpf,
-        dataCadastro=datetime.utcnow()
     )
     db.add(cliente)
     db.commit()
     db.refresh(cliente)
     return cliente
 
-def criar_funcionario(db: Session, nome: str, email: str, telefone: str, matricula: str, 
-                     data_admissao: datetime, endereco_id: int):
+def criar_funcionario(db: Session, nome: str, email: str, telefone: str, matricula: str, endereco_id: int):
     pessoa = criar_pessoa(db, nome, email, telefone, endereco_id, 'funcionario')
     
     funcionario = Funcionario(
         id=pessoa.id,
         matricula=matricula,
-        dataAdmissao=data_admissao
     )
     db.add(funcionario)
     db.commit()
     db.refresh(funcionario)
     return funcionario
 
-def criar_atendente(db: Session, nome: str, email: str, telefone: str, matricula: str, 
-                   data_admissao: datetime, salario: float, endereco_id: int):
-    funcionario = criar_funcionario(db, nome, email, telefone, matricula, data_admissao, endereco_id)
+def criar_atendente(db: Session, nome: str, email: str, telefone: str, matricula: str, salario: float, endereco_id: int):
+    funcionario = criar_funcionario(db, nome, email, telefone, matricula, endereco_id)
     
     atendente = Atendente(
         id=funcionario.id,
@@ -68,9 +64,8 @@ def criar_atendente(db: Session, nome: str, email: str, telefone: str, matricula
     db.refresh(atendente)
     return atendente
 
-def criar_tecnico(db: Session, nome: str, email: str, telefone: str, matricula: str, 
-                 data_admissao: datetime, salario: float, especialidade: str, endereco_id: int):
-    funcionario = criar_funcionario(db, nome, email, telefone, matricula, data_admissao, endereco_id)
+def criar_tecnico(db: Session, nome: str, email: str, telefone: str, matricula: str, salario: float, especialidade: str, endereco_id: int):
+    funcionario = criar_funcionario(db, nome, email, telefone, matricula, endereco_id)
     
     tecnico = TecnicoInformatica(
         id=funcionario.id,
@@ -171,21 +166,35 @@ def atualizar_estoque(db: Session, item_id: int, nova_quantidade: int):
 def deletar_cliente(db: Session, cliente_id: int):
     try:
         cliente = db.query(Cliente).filter(Cliente.id == cliente_id).first()
-        if cliente:
-            dispositivos = db.query(Dispositivo).filter(Dispositivo.cliente_id == cliente_id).all()
-            if dispositivos:
-                print("Não é possível deletar cliente com dispositivos associados.")
-                return False
+        if not cliente:
+            print("Cliente não encontrado.")
+            return False
+        
+        dispositivos = db.query(Dispositivo).filter(Dispositivo.cliente_id == cliente_id).all()
+        for dispositivo in dispositivos:
+            ordens = db.query(OrdemServico).filter(OrdemServico.dispositivo_id == dispositivo.id).all()
+            for ordem in ordens:
+                itens_utilizados = db.query(ItemUtilizado).filter(ItemUtilizado.ordem_servico_id == ordem.id).all()
+                for item in itens_utilizados:
+                    db.delete(item)
+                
+                orcamento = db.query(Orcamento).filter(Orcamento.id == ordem.orcamento_id).first()
+                if orcamento:
+                    db.delete(orcamento)
+                
+                db.delete(ordem)
             
-            db.delete(cliente)
-            
-            pessoa = db.query(Pessoa).filter(Pessoa.id == cliente_id).first()
-            if pessoa:
-                db.delete(pessoa)
-            
-            db.commit()
-            return True
-        return False
+            db.delete(dispositivo)
+        
+        db.delete(cliente)
+        
+        pessoa = db.query(Pessoa).filter(Pessoa.id == cliente_id).first()
+        if pessoa:
+            db.delete(pessoa)
+        
+        db.commit()
+        return True
+        
     except Exception as e:
         db.rollback()
         print(f"Erro ao deletar cliente: {e}")
@@ -194,16 +203,27 @@ def deletar_cliente(db: Session, cliente_id: int):
 def deletar_dispositivo(db: Session, dispositivo_id: int):
     try:
         dispositivo = db.query(Dispositivo).filter(Dispositivo.id == dispositivo_id).first()
-        if dispositivo:
-            ordens = db.query(OrdemServico).filter(OrdemServico.dispositivo_id == dispositivo_id).all()
-            if ordens:
-                print("Não é possível deletar dispositivo com ordens de serviço associadas.")
-                return False
+        if not dispositivo:
+            print("Dispositivo não encontrado.")
+            return False
+        
+        ordens = db.query(OrdemServico).filter(OrdemServico.dispositivo_id == dispositivo_id).all()
+        for ordem in ordens:
+            itens_utilizados = db.query(ItemUtilizado).filter(ItemUtilizado.ordem_servico_id == ordem.id).all()
+            for item in itens_utilizados:
+                db.delete(item)
             
-            db.delete(dispositivo)
-            db.commit()
-            return True
-        return False
+            orcamento = db.query(Orcamento).filter(Orcamento.id == ordem.orcamento_id).first()
+            if orcamento:
+                db.delete(orcamento)
+                
+            db.delete(ordem)
+        
+        db.delete(dispositivo)
+        
+        db.commit()
+        return True
+        
     except Exception as e:
         db.rollback()
         print(f"Erro ao deletar dispositivo: {e}")
