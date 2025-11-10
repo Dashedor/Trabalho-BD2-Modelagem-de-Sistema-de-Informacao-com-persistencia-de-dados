@@ -1,15 +1,24 @@
-Pre-requisitos
+# Pré-requisitos
+
 -Docker e Docker Compose instalados
+
 -Python 3.8 ou superior
 
-Como rodar
--Baixe os arquivos da Aplicação
+# Como rodar
+
+-Baixe os arquivos da aplicação
+
 -Abra o Prompt de comando dentro da pasta da aplicação
--Instale as denpendencias digitando no terminal:
-    pip install -r dependencias.txt
--Inicie o container com o Postgresql no terminal utilizando o comando:
+
+-Instale as dependências digitando no terminal:
+
+    pip install -r depedencias.txt
+-Inicie o contêiner com o PostgreSQL no terminal utilizando o comando:
+
     docker compose up -d
--Verifique se o container esta rodando utilizando o comando:
+-Verifique se o contêiner está rodando utilizando o comando:
+
     docker ps
--Para executar a aplicão digite no terminal:
-    python main.py
+-Para executar a aplicacão digite no terminal:
+
+    python menu.py
