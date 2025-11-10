@@ -34,10 +34,9 @@ class Endereco(Base):
     rua = Column(String(100), nullable=False)
     bairro = Column(String(50), nullable=False)
     cidade = Column(String(50), nullable=False)
-    estado = Column(String(2), nullable=False)
+    estado = Column(String(50), nullable=False)
     logradouro = Column(String(100), nullable=True)
 
-# Vamos simplificar a herança - usar tabelas separadas sem herança complexa
 class Pessoa(Base):
     __tablename__ = "pessoa"
     
@@ -46,7 +45,7 @@ class Pessoa(Base):
     email = Column(String(100), nullable=False)
     telefone = Column(String(15), nullable=False)
     endereco_id = Column(Integer, ForeignKey("endereco.idEndereco"))
-    tipo = Column(String(20), nullable=False)  # 'cliente', 'atendente', 'tecnico'
+    tipo = Column(String(20), nullable=False)
     
     endereco = relationship("Endereco")
 
