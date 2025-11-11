@@ -3,7 +3,6 @@ from sqlalchemy import func
 from tabelas import *
 
 def consulta_ordens_em_andamento(db: Session):
-    """Consulta 1: Ordens de serviço em andamento"""
     return db.query(
         OrdemServico.id,
         OrdemServico.dataEntrada,
@@ -19,7 +18,6 @@ def consulta_ordens_em_andamento(db: Session):
      .all()
 
 def consulta_estoque_baixo(db: Session, limite: int = 5):
-    """Consulta 2: Itens com estoque baixo (quantidade <= limite)"""
     return db.query(
         Estoque.id,
         Estoque.nome,
@@ -33,7 +31,6 @@ def consulta_estoque_baixo(db: Session, limite: int = 5):
      .all()
 
 def consulta_estoque_zerado(db: Session):
-    """Consulta 3: Itens com estoque zerado"""
     return db.query(
         Estoque.id,
         Estoque.nome,
@@ -46,7 +43,6 @@ def consulta_estoque_zerado(db: Session):
      .all()
 
 def consulta_estoque_total(db: Session):
-    """Consulta 4: Todos os itens do estoque"""
     return db.query(
         Estoque.id,
         Estoque.nome,
@@ -59,14 +55,12 @@ def consulta_estoque_total(db: Session):
      .all()
 
 def consulta_valor_total_estoque(db: Session):
-    """Consulta 5: Valor total do estoque"""
     resultado = db.query(
         func.sum(Estoque.quantidade * Estoque.valorUnitario).label('valor_total')
     ).scalar()
     return resultado or 0.0
 
 def consulta_faturamento_mensal(db: Session, mes: int, ano: int):
-    """Consulta 6: Faturamento mensal por método de pagamento"""
     return db.query(
         Orcamento.metodoPagamento,
         func.sum(Orcamento.precoTotal).label('total')
@@ -77,7 +71,6 @@ def consulta_faturamento_mensal(db: Session, mes: int, ano: int):
      .all()
 
 def consulta_tecnicos_mais_produtivos(db: Session, limite: int = 10):
-    """Consulta 7: Técnicos com mais ordens concluídas"""
     return db.query(
         Pessoa.nome,
         func.count(OrdemServico.id).label('ordens_concluidas')
@@ -92,7 +85,6 @@ def consulta_tecnicos_mais_produtivos(db: Session, limite: int = 10):
      .all()
 
 def consulta_clientes_fieis(db: Session, limite: int = 5):
-    """Consulta 8: Clientes com mais dispositivos cadastrados"""
     return db.query(
         Pessoa.nome,
         Pessoa.email,
