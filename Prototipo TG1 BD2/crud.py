@@ -22,6 +22,7 @@ def criar_endereco(db: Session, cep: str, rua: str, bairro: str, cidade: str, es
         bairro=bairro,
         cidade=cidade,
         estado=estado,
+        logradouro=logradouro
     )
     db.add(endereco)
     db.commit()
@@ -227,4 +228,27 @@ def deletar_dispositivo(db: Session, dispositivo_id: int):
     except Exception as e:
         db.rollback()
         print(f"Erro ao deletar dispositivo: {e}")
+        return False
+
+def limpar_todos_dados(db: Session):
+    try:
+        db.query(ItemUtilizado).delete()
+        db.query(OrdemServico).delete()
+        db.query(Orcamento).delete()
+        db.query(Estoque).delete()
+        db.query(Fornecedor).delete()
+        db.query(Dispositivo).delete()
+        db.query(TecnicoInformatica).delete()
+        db.query(Atendente).delete()
+        db.query(Funcionario).delete()
+        db.query(Cliente).delete()
+        db.query(Pessoa).delete()
+        db.query(Endereco).delete()
+        
+        db.commit()
+        return True
+        
+    except Exception as e:
+        db.rollback()
+        print(f"Erro ao limpar dados: {e}")
         return False

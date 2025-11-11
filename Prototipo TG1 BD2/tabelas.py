@@ -35,6 +35,7 @@ class Endereco(Base):
     bairro = Column(String(50), nullable=False)
     cidade = Column(String(50), nullable=False)
     estado = Column(String(50), nullable=False)
+    logradouro = Column(String(50), nullable=False)
 
 class Pessoa(Base):
     __tablename__ = "pessoa"

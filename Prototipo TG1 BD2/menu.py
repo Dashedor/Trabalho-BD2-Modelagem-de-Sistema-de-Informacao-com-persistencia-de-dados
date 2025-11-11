@@ -2,6 +2,7 @@ from database import create_tables, get_db
 from consultas import *
 from tabelas import *
 from crud import *
+from iniciacao_de_dados import *
 from datetime import datetime
 
 class Menu:
@@ -15,95 +16,6 @@ class Menu:
         print("=" * 50)
         print(titulo)
         print("=" * 50)
-
-    def inicializar_dados(self):
-        self.mostrar("Inicializar Dados")
-
-        try:
-            print("Esta operação irá criar dados de exemplo no banco.")
-            confirmacao = input("Deseja continuar? (s/n): ")
-            
-            if confirmacao.lower() != 's':
-                print("Operação cancelada.")
-                self.pausar()
-                return
-            
-            print("\nCriando dados de exemplo...")
-            
-            endereco = criar_endereco(
-                self.db, "65000000", "Rua das Flores", "Centro", 
-                "São Luís", "MA"
-            )
-            
-            cliente = criar_cliente(
-                self.db, "João Silva", "joao@email.com", 
-                "98999999999", "12345678901", endereco.idEndereco
-            )
-            
-            atendente = criar_atendente(
-                self.db, "Maria Santos", "maria@email.com", 
-                "98988887777", "ATD001",  
-                2500.00, endereco.idEndereco
-            )
-            
-            tecnico = criar_tecnico(
-                self.db, "Carlos Oliveira", "carlos@email.com", 
-                "98977776666", "TEC001", 
-                3500.00, "Hardware", endereco.idEndereco
-            )
-            
-            dispositivo = criar_dispositivo(
-                self.db, TipoDispositivo.NOTEBOOK, "Dell", 
-                "Inspiron 15", "DEL123456", "Não liga", cliente.id
-            )
-            
-            orcamento = criar_orcamento(
-                self.db, MetodoPagamento.CARTAO_CREDITO, 350.50,
-                dispositivo.id, atendente.id
-            )
-            
-            ordem = criar_ordem_servico(
-                self.db, dispositivo.id, tecnico.id, orcamento.id, data_previsao=datetime.utcnow(), diagnostico="Problema na fonte de alimentação"
-            )
-            
-            fornecedor = Fornecedor(
-                nome="TechParts Ltda",
-                cnpj="12345678000195",
-                material_fornecido="Componentes de hardware"
-            )
-            self.db.add(fornecedor)
-            self.db.commit()
-            self.db.refresh(fornecedor)
-            
-            itens_estoque = [
-                {"nome": "Fonte de Alimentação 500W", "descricao": "Fonte ATX 500W", "quantidade": 15, "valor": 189.90},
-                {"nome": "Memória RAM 8GB DDR4", "descricao": "Memória Kingston", "quantidade": 25, "valor": 199.90},
-                {"nome": "SSD 240GB SATA", "descricao": "SSD Kingston A400", "quantidade": 3, "valor": 159.90},
-                {"nome": "Teclado Mecânico", "descricao": "Teclado Redragon", "quantidade": 2, "valor": 249.90},
-                {"nome": "Mouse Gamer", "descricao": "Mouse Redragon Cobra", "quantidade": 0, "valor": 89.90},
-            ]
-            
-            for item in itens_estoque:
-                estoque_item = criar_estoque(
-                    self.db, item["nome"], item["descricao"], 
-                    item["quantidade"], item["valor"], fornecedor.id
-                )
-            
-            print(" Dados criados com sucesso!")
-            print("\nDados criados:")
-            print("- 1 Cliente: João Silva")
-            print("- 1 Atendente: Maria Santos") 
-            print("- 1 Técnico: Carlos Oliveira")
-            print("- 1 Dispositivo: Dell Inspiron 15")
-            print("- 1 Ordem de serviço")
-            print("- 1 Fornecedor")
-            print("- 5 Itens no estoque")
-            
-        except Exception as e:
-            print(f"Erro ao criar dados de exemplo: {e}")
-            self.db.rollback()
-
-        self.pausar()
         
     def verificar_dados_existentes(self):
         try:
@@ -142,6 +54,7 @@ class Menu:
             print("4. Deletar Objetos")
             print("5. Consultas")
             print("6. Inicializar Dados de Exemplo")
+            print("7. Limpar Todos os Dados")
             print("0. Sair")
             print("=" * 50)
 
@@ -158,7 +71,10 @@ class Menu:
             elif opcao == "5":
                 self.menu_consultas()
             elif opcao == "6":
-                self.inicializar_dados()
+                criar_dados()
+                self.pausar()
+            elif opcao == "7":
+                self.limpar_dados_menu()
             elif opcao == "0":
                 print("Saindo...")
                 break
@@ -201,8 +117,10 @@ class Menu:
             bairro = input("Bairro: ")
             cidade = input("Cidade: ")
             estado = input("Estado: ")
+            logradouro = input("Logradouro: ")
             
-            endereco = criar_endereco(self.db, cep, rua, bairro, cidade, estado)
+            
+            endereco = criar_endereco(self.db, cep, rua, bairro, cidade, estado, logradouro)
             
             print("\n--- Dados do Cliente ---")
             nome = input("Nome: ")
@@ -687,7 +605,6 @@ class Menu:
         self.mostrar("ORDENS EM ANDAMENTO")
         
         try:
-            # Usar função do queries.py
             ordens = consulta_ordens_em_andamento(self.db)
             if not ordens:
                 print("Nenhuma ordem em andamento.")
@@ -783,6 +700,45 @@ class Menu:
             
         except Exception as e:
             print(f" Erro: {e}")
+        
+        self.pausar()
+    def limpar_dados_menu(self):
+        self.mostrar("LIMPAR TODOS OS DADOS")
+        
+        try:
+            print("ATENCAO: Esta operacao ira remover TODOS os dados do banco.")
+            print("Isso inclui:")
+            print("- Todos os clientes")
+            print("- Todos os funcionarios")
+            print("- Todos os dispositivos")
+            print("- Todos os fornecedores")
+            print("- Todo o estoque")
+            print("- Todas as ordens de servico")
+            print("- Todos os orcamentos")
+            print("- Todos os enderecos")
+            
+            print("\nEsta acao nao pode ser desfeita!")
+            
+            confirmacao1 = input("Tem certeza que deseja continuar? (s/n): ")
+            
+            if confirmacao1.lower() != 's':
+                print("Operacao cancelada.")
+                self.pausar()
+                return
+            
+            confirmacao2 = input("Digite 'CONFIRMAR' para prosseguir: ")
+            
+            if confirmacao2 != 'CONFIRMAR':
+                print("Operacao cancelada.")
+                self.pausar()
+                return
+            
+            print("Iniciando limpeza...")
+            limpar_todos_dados(self.db)
+            print("Todos os dados foram removidos com sucesso!")
+            
+        except Exception as e:
+            print(f"Erro ao limpar dados: {e}")
         
         self.pausar()
 
